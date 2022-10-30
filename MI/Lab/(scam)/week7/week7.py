@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
-
+from math import sqrt
+import pandas as pd
 """
 Use DecisionTreeClassifier to represent a stump.
 ------------------------------------------------
@@ -64,9 +65,11 @@ class AdaBoost:
         Returns:
             The error in the stump(float.)
         """
-
         # TODO
-        pass
+
+        missClassified = np.where(y_pred!=y,1,0)
+        res = np.sum(sample_weights*missClassified)/np.sum(sample_weights)
+        return res
 
     def compute_alpha(self, error):
         """
@@ -80,7 +83,8 @@ class AdaBoost:
         """
         eps = 1e-9
         # TODO
-        pass
+        alpha = (0.5)*np.log((1-error)/(error+eps))
+        return alpha
 
     def update_weights(self, y, y_pred, sample_weights, alpha):
         """
@@ -94,9 +98,17 @@ class AdaBoost:
         Returns:
             new_sample_weights:  M Vector(new Weight of each sample float.)
         """
-
         # TODO
-        pass
+        error = self.stump_error(y, y_pred, sample_weights)
+        if(error==0):
+            return (sample_weights)* np.exp(alpha * (np.not_equal(y, y_pred)).astype(int))  
+        minuserror = 1-error
+        for i in range(len(sample_weights)):
+            if y[i] == y_pred[i]:
+                sample_weights[i] = sample_weights[i]/(2*minuserror)
+            else:
+                sample_weights[i] = sample_weights[i]/(2*error)
+        return sample_weights
 
     def predict(self, X):
         """
@@ -108,7 +120,8 @@ class AdaBoost:
             pred: N Vector(Class target predicted for all the inputs as int.)
         """
         # TODO
-        pass
+        stump_preds = np.array([self.stumps[stump].predict(X) for stump in range(self.n_stumps)])
+        return np.sign(stump_preds[0])
 
     def evaluate(self, X, y):
         """
@@ -123,6 +136,6 @@ class AdaBoost:
         pred = self.predict(X)
         # find correct predictions
         correct = (pred == y)
-
         accuracy = np.mean(correct) * 100  # accuracy calculation
+        print(accuracy)
         return accuracy
