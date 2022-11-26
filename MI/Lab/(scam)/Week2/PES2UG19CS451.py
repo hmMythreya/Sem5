@@ -132,4 +132,3 @@ def DFS_Traversal(cost, start_point, goals):
                 stack.append(popNodeNeighRec)
 
     return path
-    
